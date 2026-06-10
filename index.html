@@ -4,25 +4,32 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>FitPlan</title>
- <canvas id="ic" style="display:none" width="512" height="512"></canvas>
-<script>
-  (function(){
-    var img = new Image();
-    img.onload = function(){
-      var c = document.getElementById('ic');
-      var ctx = c.getContext('2d');
-      // Recadrage : zone du personnage (environ milieu vertical, centré)
-      // Image originale : 1077x1780 — personnage entre y=580 et y=1280
-      var srcX = 200, srcY = 500, srcW = 677, srcH = 677;
-      ctx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, 512, 512);
-      var link = document.createElement('link');
-      link.rel = 'apple-touch-icon';
-      link.href = c.toDataURL('image/png');
-      document.head.appendChild(link);
-    };
-    img.src = document.querySelector('link[rel="apple-touch-icon"]').href;
-  })();
-</script>
+ python3 - << 'PYEOF'
+import base64
+
+with open('/mnt/user-data/uploads/FullSizeRender.jpeg', 'rb') as f:
+    new_b64 = base64.b64encode(f.read()).decode('utf-8')
+
+print(f"New image size: {len(new_b64)} chars")
+print(f"First 30: {new_b64[:30]}")
+
+with open('/mnt/user-data/outputs/fitness-programme.html', 'r') as f:
+    html = f.read()
+
+# Find and replace the apple-touch-icon href
+import re
+pattern = r'(<link rel="apple-touch-icon" href="data:image/jpeg;base64,)[^"]*(")'
+new_html = re.sub(pattern, r'\g<1>' + new_b64 + r'\2', html)
+
+# Also update the manifest icon
+old_b64_start = html[html.find('data:image/jpeg;base64,')+23:html.find('data:image/jpeg;base64,')+53]
+print(f"Found old b64 start: {old_b64_start[:30]}")
+
+with open('/mnt/user-data/outputs/fitness-programme.html', 'w') as f:
+    f.write(new_html)
+
+print("Done! Replaced icon.")
+PYEOF
 
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
